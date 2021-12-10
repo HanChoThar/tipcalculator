@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+  <title>Frontend Mentor | Tip calculator app</title>
+  <style>
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+    }
+  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: 'hsl(172, 67%, 45%)',
+            darkcyan: 'hsl(183, 100%, 15%)',
+            darkgray: {
+              100: 'hsl(186, 14%, 43%)',
+              200: 'hsl(184, 14%, 56%)'
+            },
+            lightgray: {
+              100: 'hsl(185, 41%, 84%)',
+              200: 'hsl(189, 41%, 97%)'
+            }
+          },
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/vue@3.0.2"></script>
+</head>
+<body class="h-screen flex items-end justify-center md:items-center bg-lightgray-100 font-mono">
+  <div id="app" class="h-auto w-auto md:w-3/4 lg:w-2/4 rounded-2xl shadow-lg flex flex-col md:flex-row gap-8 bg-white p-8">
+    <div class="md:w-1/2">
+      <h3 class="text-darkgray-100">Bill</h3>
+      <div class="relative font-bold">
+        <input v-model="bill" type="number" placeholder="0" class="bg-lightgray-100 p-2 rounded mt-1 mb-6 focus:outline-none w-full text-right" min="0">
+        <svg class="absolute top-4 left-4" xmlns="http://www.w3.org/2000/svg" width="11" height="17"><path fill="#9EBBBD" d="M6.016 16.328v-1.464c1.232-.08 2.22-.444 2.964-1.092.744-.648 1.116-1.508 1.116-2.58v-.144c0-.992-.348-1.772-1.044-2.34-.696-.568-1.708-.932-3.036-1.092V4.184c.56.144 1.012.4 1.356.768.344.368.516.816.516 1.344v.288h1.824v-.432c0-.448-.088-.876-.264-1.284a3.783 3.783 0 00-.744-1.116A4.251 4.251 0 007.54 2.9a5.324 5.324 0 00-1.524-.492V.872H4.288V2.36a5.532 5.532 0 00-1.416.324c-.448.168-.84.392-1.176.672-.336.28-.604.616-.804 1.008-.2.392-.3.844-.3 1.356v.144c0 .96.316 1.708.948 2.244.632.536 1.548.884 2.748 1.044v3.912c-.704-.16-1.248-.472-1.632-.936-.384-.464-.576-1.08-.576-1.848v-.288H.256v.576c0 .464.08.924.24 1.38.16.456.404.88.732 1.272.328.392.744.728 1.248 1.008s1.108.476 1.812.588v1.512h1.728zM4.288 7.424c-.688-.128-1.164-.332-1.428-.612-.264-.28-.396-.644-.396-1.092 0-.464.176-.832.528-1.104.352-.272.784-.448 1.296-.528v3.336zm1.728 5.712V9.344c.768.128 1.328.328 1.68.6.352.272.528.688.528 1.248 0 .544-.196.984-.588 1.32-.392.336-.932.544-1.62.624z"/></svg>
+      </div>
+      
+      <h3 class="text-darkgray-100">Selected Tip %</h3>                           
+      <div @click="val" class="mt-1 mb-6 grid grid-cols-3 gap-2 text-center text-white  font-bold">
+        <input type="button" value="5" class="bg-darkcyan text-white rounded p-2 focus:bg-darkgray-200 hover:bg-darkgray-200 cursor-pointer">
+        <input type="button" value="10" class="bg-darkcyan text-white rounded p-2 focus:bg-darkgray-200 hover:bg-darkgray-200 cursor-pointer">
+        <input type="button" value="15" class="bg-darkcyan p-2 rounded focus:bg-darkgray-200 hover:bg-darkgray-200 cursor-pointer">
+        <input type="button" value="25" class="bg-darkcyan p-2 rounded focus:bg-darkgray-200 hover:bg-darkgray-200 cursor-pointer">
+        <input type="button" value="50" class="bg-darkcyan p-2 rounded focus:bg-darkgray-200 hover:bg-darkgray-200 cursor-pointer">                                                                                                                                                                                                                                            
+        <input type="number" v-model="custom" placeholder="Custom" class="bg-lightgray-100 text-darkcyan p-2 rounded text-center" min="0">
+      </div>
+
+      <div class="flex justify-between items-center">
+        <h3 class="text-darkgray-100">Numbers fo People</h3>
+        <div v-show="peopleValidate" class="text-red-500 text-xs">can't be zero</div>
+      </div>
+      <div class="relative font-bold">
+        <input v-model="peopleCount" type="number" placeholder="0" class="bg-lightgray-100 p-2 rounded mt-1 focus:outline-none w-full text-right" min="0">
+        <svg class="absolute top-4 left-4" xmlns="http://www.w3.org/2000/svg" width="13" height="16"><path fill="#9EBBBD" d="M9.573 7.729c.406 0 .784.07 1.126.209.342.14.639.33.881.569.232.227.438.503.614.82a5.1 5.1 0 01.407.949c.097.312.178.654.242 1.016.062.359.105.699.126 1.011.02.307.031.624.031.945 0 .836-.259 1.512-.768 2.01-.504.492-1.17.742-1.98.742H2.748c-.81 0-1.477-.25-1.98-.742C.259 14.76 0 14.084 0 13.248c0-.322.01-.64.032-.945.02-.312.063-.652.126-1.01.063-.363.144-.705.242-1.017.1-.323.238-.643.407-.948.176-.318.382-.594.613-.821.243-.238.54-.43.882-.57.342-.138.72-.208 1.125-.208.16 0 .313.067.61.265.183.123.397.264.636.421.204.134.48.259.822.372.333.11.671.167 1.005.167a3.19 3.19 0 001.006-.167c.341-.113.618-.238.822-.372l.636-.42c.296-.2.45-.266.61-.266zM6.598 0C7.63 0 8.522.38 9.252 1.129s1.1 1.666 1.1 2.724c0 1.06-.37 1.976-1.1 2.725-.73.75-1.623 1.13-2.654 1.13-1.03 0-1.924-.38-2.653-1.13-.73-.749-1.1-1.666-1.1-2.725 0-1.058.37-1.975 1.1-2.724C4.675.379 5.567 0 6.598 0z"/></svg>
+      </div>
+    </div>
+    <div class="bg-darkcyan rounded-2xl p-8 text-darkgray-200 md:w-1/2 relative ">
+      <div>
+        <div class="flex justify-between items-center text-2xl mb-6">
+          <h2>Tip Amount</h2>
+          <input type="button" @click="getTotal" class="font-bold bg-transparent" :value="tipAmount" disabled>
+        </div>
+        <div class="flex justify-between items-center text-2xl">
+          <h2>Total</h2>
+          <input type="button" @click="getTotal" class="font-bold bg-transparent" :value="total" disabled>
+        </div>
+      </div>
+      <div class="flex justify-center">
+        <button @click="clear"  class=" w-full mt-8 md:w-3/4 rounded bg-lightgray-100 py-2 uppercase text-darkcyan font-bold md:absolute bottom-8">reset</button>
+      </div>
+    </div>
+    
+  </div>
+  
+
+  <script>
+    const Calculator = {
+      data() {
+        return {
+          peopleValidate: false,
+          peopleCount: 1,
+          tip: null,
+          bill: null,
+          tipAmount: 0,
+          total: 0,
+          custom: null
+        }
+      },
+      watch: {
+        peopleCount(){
+          this.people()
+        },
+      },
+      computed: {
+        getTotal() {
+            let choose = this.tip || this.custom
+            let result = (100 / choose)
+            this.tipAmount = Math.ceil((this.bill / result))
+            this.total = Math.ceil((this.bill / result) * this.peopleCount)
+        }
+      },
+      methods: {
+        people() {
+          if(this.peopleCount == 0){
+            this.peopleValidate = true
+          } else {
+            this.peopleValidate = false
+          }
+        },
+        val(event) {
+           let getTip = event.target.value
+            this.tip = getTip
+        },
+        clear() {
+          this.tipAmount = 0
+          this.total = 0
+          this.tip = null
+          this.bill =null
+          this.peopleCount = 1
+        }
+      }
+    }
+
+
+    Vue.createApp(Calculator).mount('#app')
+  </script>
+</body>
+</html>
